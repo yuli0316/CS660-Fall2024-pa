@@ -19,6 +19,8 @@ public:
 
 class TupleDesc {
   // TODO pa2: add private members
+ std::vector<type_t> types;    // 存储字段类型
+ std::vector<std::string> names; // 存储字段名称
 
 public:
   TupleDesc() = default;

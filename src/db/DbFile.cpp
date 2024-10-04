@@ -10,27 +10,61 @@ const TupleDesc &DbFile::getTupleDesc() const { return td; }
 
 DbFile::DbFile(const std::string &name, const TupleDesc &td) : name(name), td(td) {
   // TODO pa2: open file and initialize numPages
-  // Hint: use open, fstat
+  fd = open(name.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+  if (fd == -1) {
+    throw std::runtime_error("Unable to open the file: " + name);
+  }
+
+
+  struct stat fileStat;
+  if (fstat(fd, &fileStat) == -1) {
+    throw std::runtime_error("Unable to get file status: " + name);
+  }
+
+  numPages = static_cast<size_t>(fileStat.st_size) / page.size();
+  if (numPages == 0) {
+    numPages = 1;
+  }
 }
 
 DbFile::~DbFile() {
-  // TODO pa2: close file
-  // Hind: use close
+  if (close(fd) == -1) {
+    throw std::runtime_error("Unable to close the file: " + name);
+  }
 }
 
 const std::string &DbFile::getName() const { return name; }
 
+// 读取页面
 void DbFile::readPage(Page &page, const size_t id) const {
-  reads.push_back(id);
   // TODO pa2: read page
   // Hint: use pread
+  reads.push_back(id);
+
+  if (id >= numPages) {
+    throw std::out_of_range("Page number out of range");
+  }
+
+  // 使用 pread 读取页面数据
+  ssize_t bytesRead = pread(fd, page.data(), page.size(), id * page.size());
+  if (bytesRead == -1) {
+    throw std::runtime_error("Failed to read the page: " + std::to_string(id));
+  }
 }
 
 void DbFile::writePage(const Page &page, const size_t id) const {
   writes.push_back(id);
-  // TODO pa2: write page
-  // Hint: use pwrite
+
+  if (id >= numPages) {
+    throw std::out_of_range("Page number out of range");
+  }
+
+  ssize_t bytesWritten = pwrite(fd, page.data(), page.size(), id * page.size());
+  if (bytesWritten == -1) {
+    throw std::runtime_error("Failed to write page: " + std::to_string(id));
+  }
 }
+
 
 const std::vector<size_t> &DbFile::getReads() const { return reads; }
 
