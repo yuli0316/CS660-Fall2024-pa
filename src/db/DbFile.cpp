@@ -35,7 +35,7 @@ DbFile::~DbFile() {
 
 const std::string &DbFile::getName() const { return name; }
 
-// 读取页面
+
 void DbFile::readPage(Page &page, const size_t id) const {
   // TODO pa2: read page
   // Hint: use pread
@@ -45,7 +45,7 @@ void DbFile::readPage(Page &page, const size_t id) const {
     throw std::out_of_range("Page number out of range");
   }
 
-  // 使用 pread 读取页面数据
+
   ssize_t bytesRead = pread(fd, page.data(), page.size(), id * page.size());
   if (bytesRead == -1) {
     throw std::runtime_error("Failed to read the page: " + std::to_string(id));
