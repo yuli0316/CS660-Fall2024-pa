@@ -12,22 +12,35 @@ void HeapFile::insertTuple(const Tuple &t) {
     throw std::invalid_argument("Tuple is not compatible with the schema");
   }
 
+  // A container to track pages that are modified (like the "pages" list in the example)
+  std::vector<Page> pages;
+
   // Retrieve the current number of pages
   size_t currentNumPages = getNumPages();
 
-  // Traverse through the pages in the file
+  // Traverse through all the pages in the file
   for (size_t i = 0; i < currentNumPages; ++i) {
     Page page;
-    // Fetch the page from BufferPool (or read from the file)
+
+    // Fetch the page from the BufferPool (or read from the file)
     page = getDatabase().getBufferPool().getPage(PageId{name, i});
 
     // Create a HeapPage object to operate on the page
     HeapPage hp(page, getTupleDesc());
 
-    // Attempt to insert the tuple. If successful, mark the page as dirty and return.
-    if (hp.insertTuple(t)) {
-      getDatabase().getBufferPool().markDirty(PageId{name, i});
-      return;
+    // Iterate over the slots from the beginning to the end
+    for (size_t slot = hp.begin(); slot != hp.end(); ++slot) {
+      if (hp.empty(slot)) {
+        // If there's an empty slot, insert the tuple
+        if(hp.insertTuple(t)) {
+          // Mark the page as dirty because we modified it
+          getDatabase().getBufferPool().markDirty(PageId{name, i});
+
+          // Add the modified page to the list
+          pages.push_back(page);
+          return; // Stop after inserting the tuple
+        }
+      }
     }
   }
 
@@ -41,16 +54,18 @@ void HeapFile::insertTuple(const Tuple &t) {
   }
 
   // Write the new page to the file and mark it as dirty
-  writePage(newPage, currentNumPages);
+  writePage(newPage, currentNumPages);  // Insert new page at the end of the file
   getDatabase().getBufferPool().markDirty(PageId{name, currentNumPages});
 
   // Increment the page count after adding the new page
   ++numPages;
+
+  // Add the new page to the list of modified pages
+  pages.push_back(newPage);
 }
 
 
 
-// Delete the tuple
 void HeapFile::deleteTuple(const Iterator &it) {
   if (it.page >= numPages) {
     throw std::out_of_range("Page out of range");
