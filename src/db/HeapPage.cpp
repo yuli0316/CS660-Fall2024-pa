@@ -6,7 +6,6 @@
 
 using namespace db;
 
-// 构造函数：初始化HeapPage对象
 HeapPage::HeapPage(Page &page, const TupleDesc &td) : td(td) {
   size_t tupleSize = td.length();
   size_t pageSize = DEFAULT_PAGE_SIZE;

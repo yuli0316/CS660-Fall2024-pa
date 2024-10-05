@@ -25,12 +25,11 @@ size_t Tuple::size() const { return fields.size(); }
 const field_t &Tuple::get_field(size_t i) const { return fields.at(i); }
 
 TupleDesc::TupleDesc(const std::vector<type_t> &types, const std::vector<std::string> &names) {
-  // 检查字段类型和名称的数量是否匹配
   if (types.size() != names.size()) {
     throw std::invalid_argument("Types and names size must match");
   }
 
-  // 检查字段名称的唯一性
+
   for (size_t i = 0; i < names.size(); ++i) {
     for (size_t j = i + 1; j < names.size(); ++j) {
       if (names[i] == names[j]) {
@@ -39,7 +38,7 @@ TupleDesc::TupleDesc(const std::vector<type_t> &types, const std::vector<std::st
     }
   }
 
-  // 赋值给成员变量
+
   this->types = types;
   this->names = names;
 }
@@ -47,7 +46,6 @@ TupleDesc::TupleDesc(const std::vector<type_t> &types, const std::vector<std::st
 
 
 bool TupleDesc::compatible(const Tuple &tuple) const {
-  // 如果 TupleDesc 为空，或者没有正确初始化，抛出未实现的错误
   if (types.empty() || names.empty()) {
     throw std::runtime_error("not implemented");
   }
@@ -57,7 +55,6 @@ bool TupleDesc::compatible(const Tuple &tuple) const {
     return false;
   }
 
-  // 检查每个字段的类型是否和 TupleDesc 中定义的类型匹配
   for (size_t i = 0; i < types.size(); ++i) {
     if (tuple.field_type(i) != types[i]) {
       return false;
@@ -77,7 +74,6 @@ size_t TupleDesc::index_of(const std::string &name) const {
 }
 
 size_t TupleDesc::offset_of(const size_t &index) const {
-  // 检查索引是否超出范围
   if (index >= types.size()) {
     throw std::out_of_range("Index out of range");
   }
