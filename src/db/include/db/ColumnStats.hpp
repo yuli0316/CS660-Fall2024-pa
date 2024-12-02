@@ -1,6 +1,7 @@
 #pragma once
 
 #include <db/Query.hpp>
+#include <vector>
 
 namespace db {
 
@@ -8,42 +9,49 @@ namespace db {
  * A class to represent a fixed-width histogram over a single integer-based field.
  */
 class ColumnStats {
-  // TODO pa4: add private members
+private:
+ unsigned buckets_;              // Number of buckets
+ int min_;                       // Minimum value of the range
+ int max_;                       // Maximum value of the range
+ double bucket_width_;           // Width of each bucket
+ std::vector<size_t> histogram_; // Vector to store counts for each bucket
+ size_t total_count_;            // Total number of values added to the histogram
 
 public:
-  /**
-   * Create a new ColumnStats.
-   *
-   * This ColumnStats should maintain a histogram of integer values that it receives.
-   * It should split the histogram into buckets.
-   *
-   * The values that are being processed will be provided one-at-a-time through the "addValue()" function.
-   *
-   * Your implementation should use constant space and have constant execution time with respect to
-   * the number of values being added (i.e., you store the values that you add in the histogram).
-   *
-   * @param buckets The number of buckets to split the input range.
-   * @param min The minimum integer value that this instance will process
-   * @param max The maximum integer value that this instance will process
-   */
-  ColumnStats(unsigned buckets, int min, int max);
+ /**
+  * Create a new ColumnStats.
+  *
+  * This ColumnStats should maintain a histogram of integer values that it receives.
+  * It should split the histogram into buckets.
+  *
+  * The values that are being processed will be provided one-at-a-time through the "addValue()" function.
+  *
+  * Your implementation should use constant space and have constant execution time with respect to
+  * the number of values being added (i.e., you store the values that you add in the histogram).
+  *
+  * @param buckets The number of buckets to split the input range.
+  * @param min The minimum integer value that this instance will process
+  * @param max The maximum integer value that this instance will process
+  */
+ ColumnStats(unsigned buckets, int min, int max);
 
-  /**
-   * Add a value to the histogram.
-   * @param v Value to add to the histogram
-   */
-  void addValue(int v);
+ /**
+  * Add a value to the histogram.
+  * @param v Value to add to the histogram
+  */
+ void addValue(int v);
 
-  /**
-   * Estimate the selectivity of a particular predicate and operand on this table.
-   *
-   * For example, if "op" is "GT" and "v" is 5,
-   * return your estimate of the fraction of elements that are greater than 5.
-   *
-   * @param op Operator
-   * @param v Value
-   * @return Predicted selectivity of this particular operator and value
-   */
-  size_t estimateCardinality(PredicateOp op, int v) const;
+ /**
+  * Estimate the selectivity of a particular predicate and operand on this table.
+  *
+  * For example, if "op" is "GT" and "v" is 5,
+  * return your estimate of the fraction of elements that are greater than 5.
+  *
+  * @param op Operator
+  * @param v Value
+  * @return Predicted selectivity of this particular operator and value
+  */
+ size_t estimateCardinality(PredicateOp op, int v) const;
 };
+
 } // namespace db
