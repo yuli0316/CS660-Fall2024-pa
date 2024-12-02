@@ -10,12 +10,12 @@ namespace db {
  */
 class ColumnStats {
 private:
- unsigned buckets_;              // Number of buckets
- int min_;                       // Minimum value of the range
- int max_;                       // Maximum value of the range
- double bucket_width_;           // Width of each bucket
- std::vector<size_t> histogram_; // Vector to store counts for each bucket
- size_t total_count_;            // Total number of values added to the histogram
+ unsigned buckets_;
+ int min_;
+ int max_;
+ double bucket_width_;
+ std::vector<size_t> histogram_;
+ size_t total_count_;
 
 public:
  /**
